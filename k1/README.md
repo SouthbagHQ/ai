@@ -1,8 +1,6 @@
-# Tiny GPT From Scratch
+# Southbag-K1-Frontier
 
-This project is a minimalistic, from-scratch implementation of a GPT (Generative Pre-trained Transformer) architecture using PyTorch. It focuses on clarity, educational value, and providing a clean skeleton for learning how large language models (LLMs) work under the hood. 
-
-**Note**: This model is currently a skeleton with randomly initialized weights. No training loop or dataset is included.
+Southbag-K1-Frontier is Southbag's frontier banking agent — a from-scratch GPT (Generative Pre-trained Transformer) architecture implemented in PyTorch. The companion model is **Southbag-C1**. This repo focuses on clarity and showing how the models work under the hood.
 
 ## Project Structure
 
@@ -52,10 +50,11 @@ To generate text, we provide an initial context (e.g., "hello").
 
 ## Running the Code
 
-You can run `generate.py` to see a dummy generation pass with the randomly initialized model:
+Train the model, then generate:
 
 ```bash
 pip install -r requirements.txt
-python generate.py
+python train.py
 ```
-*(Since the model is untrained, the output will be gibberish.)*
+
+Southbag-K1-Frontier is trained on the Southbag persona dataset; Southbag-C1 is a small companion model.

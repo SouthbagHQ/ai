@@ -1,8 +1,9 @@
 """
-Training script for the Tiny GPT model.
+Training script for the Southbag-K1-Frontier model.
 """
 
 import os
+import math
 import urllib.request
 import torch
 from config import GPTConfig
@@ -10,11 +11,15 @@ from tokenizer import CharTokenizer
 from model import GPT
 
 # --- Hyperparameters for training ---
-batch_size = 32 # How many independent sequences will we process in parallel?
-max_iters = 50
-eval_interval = 500
-learning_rate = 1e-3
-eval_iters = 2
+batch_size = 64 # How many independent sequences will we process in parallel?
+max_iters = 2000
+eval_interval = 200
+learning_rate = 3e-4
+min_lr = 3e-5         # Floor for cosine LR decay
+warmup_iters = 100    # Linear warmup steps
+weight_decay = 1e-1   # AdamW weight decay (regularization)
+grad_clip = 1.0       # Gradient clipping norm
+eval_iters = 50
 # device = 'cuda' if torch.cuda.is_available() else 'cpu'
 device = 'cpu' # Use CPU by default for the skeleton, or auto-detect
 if torch.cuda.is_available():
@@ -76,17 +81,33 @@ def estimate_loss():
     model.train() # Set back to training mode
     return out
 
-# 5. Create PyTorch optimizer
-optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
+# 5. Create PyTorch optimizer (AdamW with weight decay for regularization)
+optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+
+# Learning rate schedule: linear warmup then cosine decay to min_lr
+def get_lr(it):
+    if it < warmup_iters:
+        return learning_rate * (it + 1) / warmup_iters
+    if it > max_iters:
+        return min_lr
+    decay_ratio = (it - warmup_iters) / (max_iters - warmup_iters)
+    coeff = 0.5 * (1.0 + math.cos(math.pi * decay_ratio))
+    return min_lr + coeff * (learning_rate - min_lr)
 
 # 6. Training loop
 print("Starting training...")
+best_val_loss = float('inf')
 for iter in range(max_iters):
+
+    # Set learning rate for this iteration
+    lr = get_lr(iter)
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = lr
 
     # Every once in a while evaluate the loss on train and val sets
     if iter % eval_interval == 0 or iter == max_iters - 1:
         losses = estimate_loss()
-        print(f"step {iter}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
+        print(f"step {iter}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}, lr {lr:.6f}")
 
     # Sample a batch of data
     xb, yb = get_batch('train')
@@ -97,6 +118,7 @@ for iter in range(max_iters):
     # Backpropagation
     optimizer.zero_grad(set_to_none=True) # Clear previous gradients
     loss.backward()                       # Compute gradients
+    torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip) # Clip exploding gradients
     optimizer.step()                      # Update weights
 
 print("Training complete!")
@@ -111,6 +133,12 @@ generated_tokens = generate_text(model, context, max_new_tokens=500)
 print(tokenizer.decode(generated_tokens[0].tolist()))
 print("-----------------------")
 
-# Optionally save the model
-torch.save(model.state_dict(), 'tiny_gpt.pt')
-print("\nModel saved to tiny_gpt.pt")
+# Save full checkpoint (weights + vocab + config) so chat.py can reload it
+checkpoint = {
+    'model_state': model.state_dict(),
+    'stoi': tokenizer.stoi,
+    'itos': tokenizer.itos,
+    'config': config,
+}
+torch.save(checkpoint, 'model.bin')
+print("\nModel saved to model.bin")

@@ -1,5 +1,5 @@
 """
-Configuration for the Tiny GPT model.
+Configuration for the Southbag-C1 model.
 """
 
 from dataclasses import dataclass

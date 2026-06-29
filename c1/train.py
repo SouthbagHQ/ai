@@ -37,7 +37,7 @@ def get_batch(split):
     y = torch.stack([data_split[i+1:i+config.context_length+1] for i in ix])
     return x.to(device), y.to(device)
 
-print("Starting training on 'cheese'...")
+print("Starting Southbag-C1 training on 'cheese'...")
 for iter in range(max_iters):
     xb, yb = get_batch('train')
     logits, loss = model(xb, yb)
