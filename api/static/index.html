@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Southbag K1 Playground</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --error: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, #020617 0%, var(--bg-dark) 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0 0 0.5rem 0;
+            background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .card {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--glass-border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        input[type="text"], select, textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            color: white;
+            font-family: inherit;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: all 0.2s;
+        }
+
+        input[type="text"]:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            margin-bottom: 1rem;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+        
+        button.secondary {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        button.secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        button:disabled {
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.3);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .api-key-section {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .chat-box {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 0.75rem;
+            max-width: 85%;
+            animation: fadeIn 0.3s ease;
+            white-space: pre-wrap;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            background: var(--primary);
+            align-self: flex-end;
+            border-bottom-right-radius: 0.25rem;
+        }
+
+        .message.bot {
+            background: rgba(255, 255, 255, 0.1);
+            align-self: flex-start;
+            border-bottom-left-radius: 0.25rem;
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            align-self: center;
+            max-width: 100%;
+        }
+
+        .status {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-align: right;
+            margin-top: 0.5rem;
+        }
+        
+        .dots {
+            display: inline-block;
+        }
+        .dots::after {
+            content: '.';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+        @keyframes dots {
+            0%, 20% { color: rgba(0,0,0,0); text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0); }
+            40% { color: white; text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0); }
+            60% { text-shadow: .25em 0 0 white, .5em 0 0 rgba(0,0,0,0); }
+            80%, 100% { text-shadow: .25em 0 0 white, .5em 0 0 white; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="glass-panel">
+            <h1>Southbag API Hub</h1>
+            <p class="subtitle">Access the cutting-edge K1 and C1 (Cheese) models. Limits apply.</p>
+
+            <div class="card" style="margin-bottom: 2rem;">
+                <label>API Key (Max 5 req/day)</label>
+                <div class="api-key-section">
+                    <input type="text" id="apiKey" placeholder="sb_..." />
+                    <button class="secondary" onclick="generateKey()">Generate Key</button>
+                </div>
+                <div class="status" id="rateStatus">No key active</div>
+            </div>
+
+            <label>Select Model</label>
+            <select id="modelSelect" style="margin-bottom: 1.5rem;">
+                <option value="k1">K1 - Southbag Frontier Agent</option>
+                <option value="c1">C1 - The Cheese Model</option>
+            </select>
+
+            <label>Prompt</label>
+            <textarea id="promptInput" placeholder="What is your name?"></textarea>
+            
+            <button onclick="submitPrompt()" id="submitBtn" style="width: 100%;">Generate Response</button>
+
+            <div class="chat-box" id="chatBox">
+                <div class="message bot">Welcome to the Southbag Terminal. Enter your key to begin.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function generateKey() {
+            try {
+                const res = await fetch('/keygen');
+                const data = await res.json();
+                document.getElementById('apiKey').value = data.api_key;
+                document.getElementById('rateStatus').innerText = "5/5 requests remaining today";
+            } catch (e) {
+                alert("Failed to generate key");
+            }
+        }
+
+        async function submitPrompt() {
+            const apiKey = document.getElementById('apiKey').value;
+            const model = document.getElementById('modelSelect').value;
+            const prompt = document.getElementById('promptInput').value;
+            const chatBox = document.getElementById('chatBox');
+            const btn = document.getElementById('submitBtn');
+
+            if (!apiKey) {
+                alert("Please generate or enter an API key first.");
+                return;
+            }
+            if (!prompt) return;
+
+            // Add user message
+            chatBox.innerHTML += `<div class="message user">${prompt}</div>`;
+            document.getElementById('promptInput').value = '';
+            
+            // Add loading bot message
+            const loadingId = 'msg-' + Date.now();
+            chatBox.innerHTML += `<div class="message bot" id="${loadingId}">Thinking<span class="dots"></span></div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+            
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ api_key: apiKey, model, prompt })
+                });
+                
+                const data = await res.json();
+                const msgEl = document.getElementById(loadingId);
+                
+                if (res.ok) {
+                    msgEl.innerText = data.response;
+                    document.getElementById('rateStatus').innerText = `${data.remaining}/5 requests remaining today`;
+                } else {
+                    msgEl.className = "message error";
+                    msgEl.innerText = `Error: ${data.detail || 'Unknown error'}`;
+                }
+            } catch (e) {
+                document.getElementById(loadingId).className = "message error";
+                document.getElementById(loadingId).innerText = "Connection failed.";
+            }
+            
+            btn.disabled = false;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
+</body>
+</html>
