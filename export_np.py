@@ -13,8 +13,14 @@ def export(model_dir, pt_file):
     print(f"Exporting {model_dir}...")
     
     # Reconstruct tokenizer to get the exact vocab
-    with open(os.path.join(model_dir, 'input.txt'), 'r', encoding='utf-8') as f:
-        text = f.read()
+    try:
+        with open(os.path.join(model_dir, 'input.txt'), 'r', encoding='utf-8') as f:
+            text = f.read()
+    except FileNotFoundError:
+        if model_dir == 'c1':
+            text = "cheese " * 500
+        else:
+            raise
     tokenizer = CharTokenizer(text)
     
     # Save vocab

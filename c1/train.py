@@ -17,7 +17,7 @@ config = GPTConfig(vocab_size=tokenizer.vocab_size)
 model = GPT(config)
 
 batch_size = 32
-max_iters = 1000
+max_iters = 50
 learning_rate = 1e-3
 
 # Auto-detect device

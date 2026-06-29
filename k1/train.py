@@ -11,10 +11,10 @@ from model import GPT
 
 # --- Hyperparameters for training ---
 batch_size = 32 # How many independent sequences will we process in parallel?
-max_iters = 5000
+max_iters = 50
 eval_interval = 500
 learning_rate = 1e-3
-eval_iters = 200
+eval_iters = 2
 # device = 'cuda' if torch.cuda.is_available() else 'cpu'
 device = 'cpu' # Use CPU by default for the skeleton, or auto-detect
 if torch.cuda.is_available():
